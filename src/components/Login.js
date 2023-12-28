@@ -1,13 +1,63 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import Header from "./Header"
+import { checkValidateData } from "../utils/validate";
+import { auth } from "../utils/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 const Login = () => {
 
   const [isSignIn,setIsSignIn]=useState(true);
+  const [errorMessage,setErrorMessage]=useState(null);
+
+  const email=useRef(null);  
+  const password=useRef(null)
+
+  const handleButtonClick=()=>{
+    //validate the form data
+    const message=checkValidateData(email.current.value,password.current.value)
+
+    setErrorMessage(message);
+
+    if(message) return; //this indicates to stop our program if any error message comes from validation(i.e not null)
+
+    //Sign In/up logic
+
+    if(!isSignIn){
+      //sign up logic
+      createUserWithEmailAndPassword(auth, email.current.value,password.current.value)
+  .then((userCredential) => {
+    // Signed up 
+    const user = userCredential.user;
+    console.log(user)
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    setErrorMessage(errorCode + " - " + errorMessage)
+  });
+    }
+
+    else {
+      //sign in logic
+      signInWithEmailAndPassword(auth,email.current.value,password.current.value)
+      .then((userCredential)=>{
+        const user=userCredential.user;
+        console.log(user)
+      })
+      .catch((error) =>{
+        const errorCode=error.message;
+        const errorMessage=error.message;
+        setErrorMessage(errorCode + " - " + errorMessage)
+      });
+    }
+
+  }
 
   const toggleSignInForm=()=>{
 setIsSignIn(!isSignIn); 
   }
+
+
   return (
     <div>
         <Header/>
@@ -19,6 +69,7 @@ setIsSignIn(!isSignIn);
     </div>
 
     <form 
+    onSubmit={(e)=>e.preventDefault()}   //we used it tio prevent submit whenever we clicked any button inside form
     className="absolute w-3/12 p-12 bg-black my-36 mx-auto right-0 left-0 text-white rounded-md bg-opacity-80">
 
         <h1 className="font-bold text-3xl py-4">
@@ -34,6 +85,7 @@ setIsSignIn(!isSignIn);
 
 
         <input 
+        ref={email}
         type="text" 
         placeholder="Email Address" 
         className="p-4 my-4 w-full rounded-md bg-neutral-700 "
@@ -41,14 +93,21 @@ setIsSignIn(!isSignIn);
 
 
         <input 
+        ref={password}
         type="password " 
         placeholder="Password" 
         className="p-4 my-4 w-full rounded-md bg-neutral-700" 
         />  
 
 
+        <p 
+        className="text-red-600 text-lg font-bold py-2">
+            {errorMessage}
+        </p>
+
+
         <button 
-        className="p-4 my-6 bg-red-600 rounded-md w-full">
+        className="p-4 my-6 bg-red-600 rounded-md w-full" onClick={handleButtonClick}>
           {isSignIn ? "Sign In" : "Sign Up"}
           </button>
 
