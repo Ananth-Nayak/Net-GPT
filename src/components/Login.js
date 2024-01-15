@@ -3,15 +3,14 @@ import Header from "./Header"
 import { checkValidateData } from "../utils/validate";
 import { auth } from "../utils/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
+import { BG_IMG, USER_ICON } from "../utils/constants";
 
 const Login = () => {
 
   const [isSignIn,setIsSignIn]=useState(true);
   const [errorMessage,setErrorMessage]=useState(null);
-  const navigate=useNavigate();
   const dispatch=useDispatch();
 
   const name=useRef(null);
@@ -30,31 +29,38 @@ const Login = () => {
 
     if(!isSignIn){
       //sign up logic
-      createUserWithEmailAndPassword(auth, email.current.value,password.current.value)
-  .then((userCredential) => {
-    // Signed up 
-    const user = userCredential.user;
-    updateProfile(user,{
-      displayName:name.current.value
-    })
-    .then(()=>{
-      const {uid,email,displayName} = auth.currentUser;             //if user sign in/up this part will be executed
-          dispatch(addUser({
-            uid: uid, 
-            email:email, 
-            displayName: displayName
-          }));
-      navigate("/browse")
-    })
-    .catch((error)=>{
-      setErrorMessage(errorMessage);
-    })
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    setErrorMessage(errorCode + " - " + errorMessage)
-  });
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+        )
+          .then((userCredential) => {
+            // Signed up 
+            const user = userCredential.user;
+            updateProfile(user,{
+              displayName:name.current.value,
+              userIcon: USER_ICON,
+            })
+            .then(()=>{
+              const {uid,email,displayName,userIcon} = auth.currentUser;             //if user sign in/up this part will be executed
+                  dispatch(
+                    addUser({
+                    uid: uid, 
+                    email:email, 
+                    displayName: displayName,
+                    userIcon: userIcon
+                  }));
+            })
+            .catch((error)=>{
+              setErrorMessage(error.message);
+            });
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            setErrorMessage(errorCode + " - " + errorMessage)
+          });
+
     }
 
     else {
@@ -62,8 +68,6 @@ const Login = () => {
       signInWithEmailAndPassword(auth,email.current.value,password.current.value)
       .then((userCredential)=>{
         const user=userCredential.user;
-        console.log(user)
-        navigate("/browse")
       })
       .catch((error) =>{
         const errorCode=error.message;
@@ -72,7 +76,7 @@ const Login = () => {
       });
     }
 
-  }
+          };
 
   const toggleSignInForm=()=>{
 setIsSignIn(!isSignIn); 
@@ -84,7 +88,7 @@ setIsSignIn(!isSignIn);
         <Header/>
         <div className="absolute">
         <img 
-        src="https://assets.nflxext.com/ffe/siteui/vlv3/ca6a7616-0acb-4bc5-be25-c4deef0419a7/c5af601a-6657-4531-8f82-22e629a3795e/IN-en-20231211-popsignuptwoweeks-perspective_alpha_website_large.jpg"
+        src={BG_IMG}
         alt="bg-img" 
         />
     </div>
@@ -118,7 +122,7 @@ setIsSignIn(!isSignIn);
 
         <input 
         ref={password}
-        type="password " 
+        type="password" 
         placeholder="Password" 
         className="p-4 my-4 w-full rounded-md bg-neutral-700" 
         />  
