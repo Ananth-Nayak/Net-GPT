@@ -5,7 +5,7 @@ import { auth } from "../utils/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
-import { BG_IMG, USER_ICON } from "../utils/constants";
+import { BG_IMG, USER_ICON} from "../utils/constants";
 
 const Login = () => {
 
@@ -23,9 +23,7 @@ const Login = () => {
 
     setErrorMessage(message);
 
-    if(message) return; //this indicates to stop our program if any error message comes from validation(i.e not null)
-
-    //Sign In/up logic
+    if(message) return; 
 
     if(!isSignIn){
       //sign up logic
@@ -37,9 +35,9 @@ const Login = () => {
           .then((userCredential) => {
             // Signed up 
             const user = userCredential.user;
-            updateProfile(user,{
+            updateProfile(user, {
               displayName:name.current.value,
-              userIcon: USER_ICON,
+              userIcon:USER_ICON,
             })
             .then(()=>{
               const {uid,email,displayName,userIcon} = auth.currentUser;             //if user sign in/up this part will be executed
@@ -48,7 +46,7 @@ const Login = () => {
                     uid: uid, 
                     email:email, 
                     displayName: displayName,
-                    userIcon: userIcon
+                    userIcon: userIcon,
                   }));
             })
             .catch((error)=>{
